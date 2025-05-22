@@ -1,0 +1,39 @@
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { User, BadgeDollarSign, LogOut, Settings } from "lucide-react";
+
+export const UserDropdown = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuContent align="end" side="bottom">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <User className="mr-2 h-4 w-4" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <BadgeDollarSign className="mr-2 h-4 w-4" />
+          Subscription
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-rose-500 hover:text-rose-500">
+          <LogOut className="mr-2 h-4 w-4 text-rose-500 hover:text-rose-500" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
