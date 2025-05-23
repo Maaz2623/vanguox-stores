@@ -14,8 +14,14 @@ import {
 import { Store, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { CreateStoreDialog } from "./create-store-dialog";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
+  const trpc = useTRPC();
+
+  const { data } = useSuspenseQuery(trpc.stores.getStoresByUser.queryOptions());
+
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,9 +38,9 @@ export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
               My stores
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuItem>Store A</DropdownMenuItem>
-              <DropdownMenuItem>Store B</DropdownMenuItem>
-              <DropdownMenuItem>Store C</DropdownMenuItem>
+              {data.map((store) => (
+                <DropdownMenuItem key={store.id}>{store.name}</DropdownMenuItem>
+              ))}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 

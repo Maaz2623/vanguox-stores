@@ -3,7 +3,7 @@ import { authClient } from "@/lib/auth-client";
 import { Bebas_Neue } from "next/font/google";
 import { UserDropdown } from "./user-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { StoresDropdown } from "./stores-button";
+import { StoresDropdown } from "./stores-dropdown";
 import { Button } from "@/components/ui/button";
 import { StoreIcon } from "lucide-react";
 
