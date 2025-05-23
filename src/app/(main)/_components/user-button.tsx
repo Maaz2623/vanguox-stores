@@ -6,6 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { signOut } from "@/lib/auth-client";
 
 import { User, BadgeDollarSign, LogOut, Settings } from "lucide-react";
 
@@ -29,7 +30,10 @@ export const UserDropdown = ({ children }: { children: React.ReactNode }) => {
           Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-rose-500 hover:text-rose-500">
+        <DropdownMenuItem
+          onClick={() => signOut()}
+          className="text-rose-500 hover:text-rose-500"
+        >
           <LogOut className="mr-2 h-4 w-4 text-rose-500 hover:text-rose-500" />
           Logout
         </DropdownMenuItem>
