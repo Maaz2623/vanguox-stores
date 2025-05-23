@@ -1,12 +1,16 @@
 import React from "react";
-import { TopMenu } from "./_components/(landing)/top-menu";
 
 const MainPage = () => {
   return (
-    <div className="min-h-screen bg-white rounded-lg overflow-hidden border">
-      <TopMenu />
+    <div className="min-h-screen bg-white rounded-lg overflow-hidden border flex">
+      <LeftSection />
+      {/* Right section can go here */}
     </div>
   );
 };
 
 export default MainPage;
+
+const LeftSection = () => {
+  return <div className="border-r h-full w-[20%]">Left Section</div>;
+};

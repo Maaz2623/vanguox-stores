@@ -7,7 +7,7 @@ export default async function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-gray-50">
+    <div className="">
       <Navbar />
       <div className="px-3">{children}</div>
     </div>
