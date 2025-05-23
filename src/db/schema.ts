@@ -1,9 +1,4 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -63,4 +58,14 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at").$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
+});
+
+export const stores = pgTable("stores", {
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  ownerId: text("owner_id").references(() => user.id, {
+    onDelete: "cascade",
+  }),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });

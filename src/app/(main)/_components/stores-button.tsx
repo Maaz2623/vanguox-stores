@@ -41,8 +41,8 @@ export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create  
+            <PlusCircle className=" h-4 w-4" />
+            Create
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
