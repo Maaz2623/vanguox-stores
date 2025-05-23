@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -26,6 +26,8 @@ export const CreateStoreDialog = ({
   open,
   setOpen,
 }: CreateStoreDialogProps) => {
+  const queryClient = useQueryClient();
+
   const [shopName, setShopName] = useState("");
 
   const trpc = useTRPC();
@@ -49,6 +51,9 @@ export const CreateStoreDialog = ({
 
       {
         onSuccess: (data) => {
+          queryClient.invalidateQueries(
+            trpc.stores.getStoresByUser.queryOptions()
+          );
           router.push(`/stores/${data.name}`);
           setShopName("");
           setOpen(false);

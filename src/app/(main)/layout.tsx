@@ -19,7 +19,7 @@ export default async function MainLayout({
           <Navbar />
         </Suspense>
       </HydrationBoundary>
-      <div className="p-3">{children}</div>
+      <div className="px-5">{children}</div>
     </div>
   );
 }
