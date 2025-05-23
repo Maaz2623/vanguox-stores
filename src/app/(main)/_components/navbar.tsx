@@ -43,14 +43,14 @@ export const Navbar = async () => {
                   <StoreIcon />
                 </Button>
               </StoresDropdown>
-              <UserDropdown>
-                <Avatar className="cursor-pointer">
-                  {userImage && <AvatarImage src={userImage} />}
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              </UserDropdown>
             </Suspense>
-          </HydrationBoundary>{" "}
+          </HydrationBoundary>
+          <UserDropdown>
+            <Avatar className="cursor-pointer">
+              {userImage && <AvatarImage src={userImage} />}
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </UserDropdown>
         </div>
       </div>
     </div>
