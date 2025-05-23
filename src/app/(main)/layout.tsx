@@ -1,4 +1,5 @@
 import React from "react";
+import { Navbar } from "./_components/navbar";
 
 export default async function MainLayout({
   children,
@@ -7,7 +8,8 @@ export default async function MainLayout({
 }) {
   return (
     <div className="bg-gray-50">
-      <div className="px-5">{children}</div>
+      <Navbar />
+      <div className="px-3">{children}</div>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
         <TooltipProvider title="Manage stores">
           <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         </TooltipProvider>
-        <DropdownMenuContent align="end" side="bottom">
+        <DropdownMenuContent align="end" side="bottom" className="w-[200px]">
           <DropdownMenuLabel>Manage Stores</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
