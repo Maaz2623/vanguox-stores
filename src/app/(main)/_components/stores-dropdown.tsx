@@ -17,6 +17,7 @@ import { CreateStoreDialog } from "./create-store-dialog";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { TooltipProvider } from "@/components/tooltip-provider";
 
 export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
   const trpc = useTRPC();
@@ -30,7 +31,9 @@ export const StoresDropdown = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+        <TooltipProvider title="Manage stores">
+          <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+        </TooltipProvider>
         <DropdownMenuContent align="end" side="bottom">
           <DropdownMenuLabel>Manage Stores</DropdownMenuLabel>
           <DropdownMenuSeparator />

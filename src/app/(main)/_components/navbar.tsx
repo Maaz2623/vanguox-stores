@@ -1,20 +1,30 @@
-"use client";
-import { authClient } from "@/lib/auth-client";
 import { Bebas_Neue } from "next/font/google";
 import { UserDropdown } from "./user-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StoresDropdown } from "./stores-dropdown";
 import { Button } from "@/components/ui/button";
 import { StoreIcon } from "lucide-react";
+import { auth } from "@/auth";
+import { headers } from "next/headers";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
 
 const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
   weight: ["400"],
 });
 
-export const Navbar = () => {
-  const session = authClient.useSession();
-  const userImage = session.data?.user?.image;
+export const Navbar = async () => {
+  const queryClient = getQueryClient();
+
+  void queryClient.prefetchQuery(trpc.stores.getStoresByUser.queryOptions());
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const userImage = session?.user.image;
 
   return (
     <div className="w-full px-3 py-4">
@@ -26,17 +36,21 @@ export const Navbar = () => {
         </div>
 
         <div className="flex justify-between items-center gap-x-2">
-          <StoresDropdown>
-            <Button variant={`outline`} size={`icon`}>
-              <StoreIcon />
-            </Button>
-          </StoresDropdown>
-          <UserDropdown>
-            <Avatar className="cursor-pointer">
-              {userImage && <AvatarImage src={userImage} />}
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </UserDropdown>
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <Suspense>
+              <StoresDropdown>
+                <Button variant={`outline`} size={`icon`}>
+                  <StoreIcon />
+                </Button>
+              </StoresDropdown>
+              <UserDropdown>
+                <Avatar className="cursor-pointer">
+                  {userImage && <AvatarImage src={userImage} />}
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </UserDropdown>
+            </Suspense>
+          </HydrationBoundary>{" "}
         </div>
       </div>
     </div>

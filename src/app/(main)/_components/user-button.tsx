@@ -1,3 +1,5 @@
+"use client";
+import { TooltipProvider } from "@/components/tooltip-provider";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,7 +15,9 @@ import { User, BadgeDollarSign, LogOut, Settings } from "lucide-react";
 export const UserDropdown = ({ children }: { children: React.ReactNode }) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <TooltipProvider title="Your Profile">
+        <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      </TooltipProvider>
       <DropdownMenuContent align="end" side="bottom">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
