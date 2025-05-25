@@ -73,3 +73,20 @@ export const stores = pgTable("stores", {
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const products = pgTable("stores", {
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
+  title: text("name").notNull(),
+  description: text("name").notNull(),
+  storeId: uuid("store_id")
+    .references(() => stores.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
