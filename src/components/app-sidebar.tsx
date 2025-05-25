@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useParams } from "next/navigation";
 
 const data = {
   user: {
@@ -152,6 +153,10 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const params = useParams<{
+    storeName: string;
+  }>();
+
   const session = authClient.useSession();
 
   const user = {
@@ -171,7 +176,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link href="/">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">VANGUOX</span>
+                <span className="text-base font-semibold">
+                  {params.storeName}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
