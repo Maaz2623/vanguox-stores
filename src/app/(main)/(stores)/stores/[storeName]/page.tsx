@@ -6,7 +6,15 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import data from "./data.json";
 
-export default function Page() {
+interface Params {
+  params: Promise<{
+    storeId: string;
+  }>;
+}
+
+export default async function Page({ params }: Params) {
+  const { storeId } = await params;
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -19,7 +27,7 @@ export default function Page() {
               <div className="px-4 lg:px-6">
                 {/* <ChartAreaInteractive /> */}
               </div>
-              <DataTable data={data} />
+              <DataTable data={data} storeId={storeId} />
             </div>
           </div>
         </div>

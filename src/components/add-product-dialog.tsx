@@ -26,6 +26,8 @@ import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -37,13 +39,19 @@ type FormValues = z.infer<typeof formSchema>;
 export const AddProductDialog = ({
   open,
   setOpen,
+  storeId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  storeId: string;
 }) => {
+  const trpc = useTRPC();
+
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const mutation = useMutation(trpc.products.createProduct.mutationOptions());
+  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -110,7 +118,28 @@ export const AddProductDialog = ({
       return;
     }
 
-    console.log(data);
+    const createProduct = mutation.mutateAsync(
+      {
+        title: data.title,
+        description: data.description,
+        images: uploaded.map((images) => images.ufsUrl),
+        storeId: storeId,
+      },
+      {
+        onSuccess: (data) => {
+          queryClient.invalidateQueries(
+            trpc.stores.getStoresByUser.queryOptions()
+          );
+          console.log(data);
+        },
+      }
+    );
+
+    toast.promise(createProduct, {
+      loading: "Creating your product",
+      success: "Product has been created.",
+      error: "Something went wrong",
+    });
 
     // ✅ Form and UI reset is handled in onClientUploadComplete
   };

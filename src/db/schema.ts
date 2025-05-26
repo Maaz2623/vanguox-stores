@@ -74,19 +74,30 @@ export const stores = pgTable("stores", {
     .notNull(),
 });
 
-export const products = pgTable("stores", {
+export const products = pgTable("products", {
   id: uuid("id").notNull().defaultRandom().primaryKey(),
-  title: text("name").notNull(),
-  description: text("name").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
   storeId: uuid("store_id")
-    .references(() => stores.id, {
-      onDelete: "cascade",
-    })
+    .references(() => stores.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+
+export const productImages = pgTable("product_images", {
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
+  productId: uuid("product_id")
+    .references(() => products.id, { onDelete: "cascade" })
+    .notNull(),
+  url: text("url").notNull(), // The URL/path of the image (could be a string or text)
+  altText: text("alt_text").default(""), // Optional alt text for accessibility
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
     .notNull(),
 });

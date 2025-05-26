@@ -334,8 +334,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 
 export function DataTable({
   data: initialData,
+  storeId,
 }: {
   data: z.infer<typeof schema>[];
+  storeId: string;
 }) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -401,7 +403,7 @@ export function DataTable({
 
   return (
     <>
-      <AddProductDialog open={open} setOpen={setOpen} />
+      <AddProductDialog open={open} setOpen={setOpen} storeId={storeId} />
       <Tabs
         defaultValue="outline"
         className="w-full flex-col justify-start gap-6"
