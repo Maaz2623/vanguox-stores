@@ -20,9 +20,12 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useUploadThing } from "@/lib/uploadthing"; // your generated helpers
 import { useState } from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
+import { toast } from "sonner";
+import { ScrollArea } from "./ui/scroll-area";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -40,6 +43,7 @@ export const AddProductDialog = ({
 }) => {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -49,27 +53,38 @@ export const AddProductDialog = ({
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    if (images.length === 0) return;
+  const { startUpload, isUploading } = useUploadThing("imageUploader", {
+    onUploadProgress: (p) => setUploadProgress(p),
+    onClientUploadComplete: (res) => {
+      const imageUrls = res?.map((f) => f.ufsUrl) ?? [];
 
-    const newProduct = {
-      ...data,
-      images,
-    };
+      const newProduct = {
+        ...form.getValues(),
+        images: imageUrls,
+      };
 
-    console.log("Submitted product:", newProduct);
+      console.log("Submitted product:", newProduct);
 
-    // reset
-    form.reset();
-    setImages([]);
-    setImagePreviews([]);
-    setOpen(false);
-  };
+      toast.success("Product uploaded!");
+      form.reset();
+      setImages([]);
+      setImagePreviews([]);
+      setUploadProgress(0);
+      setOpen(false);
+    },
+    onUploadError: (error) => {
+      console.error("Upload failed:", error);
+      toast.error("Upload failed.");
+    },
+    onUploadBegin: (fileName: string) => {
+      toast("Uploading started for: " + fileName);
+    },
+
+    uploadProgressGranularity: "fine",
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-
-    // Filter out duplicates based on file name and size
     const newFiles = files.filter(
       (file) =>
         !images.some((img) => img.name === file.name && img.size === file.size)
@@ -80,6 +95,24 @@ export const AddProductDialog = ({
       ...prev,
       ...newFiles.map((file) => URL.createObjectURL(file)),
     ]);
+  };
+
+  const onSubmit = async (data: FormValues) => {
+    if (images.length === 0) {
+      toast.warning("Please add at least one image.");
+      return;
+    }
+
+    const uploaded = await startUpload(images);
+
+    if (!uploaded) {
+      toast.error("Upload failed or cancelled.");
+      return;
+    }
+
+    console.log(data);
+
+    // ✅ Form and UI reset is handled in onClientUploadComplete
   };
 
   return (
@@ -127,36 +160,47 @@ export const AddProductDialog = ({
                 onChange={handleImageChange}
               />
               {imagePreviews.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {imagePreviews.map((src, i) => (
-                    <div key={i} className="relative">
-                      <Image
-                        src={src}
-                        alt={`Preview ${i + 1}`}
-                        width={120}
-                        height={120}
-                        className="rounded-md border object-cover aspect-square"
-                      />
-                      <Button
-                        variant={`ghost`}
-                        size={`icon`}
-                        onClick={() => {
-                          setImages((prev) =>
-                            prev.filter((_, idx) => idx !== i)
-                          );
-                          setImagePreviews((prev) =>
-                            prev.filter((_, idx) => idx !== i)
-                          );
-                        }}
-                        className="h-5 w-5 bg-white rounded-full absolute -top-0.5 -right-0.5 border"
-                      >
-                        <XIcon />
-                      </Button>
-                    </div>
-                  ))}
+                <div className="flex h-[200px] flex-wrap gap-2 mt-2">
+                  <ScrollArea className="h-full w-full">
+                    {imagePreviews.map((src, i) => (
+                      <div key={i} className="relative">
+                        <Image
+                          src={src}
+                          alt={`Preview ${i + 1}`}
+                          width={120}
+                          height={120}
+                          className="rounded-md border object-cover aspect-square"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setImages((prev) =>
+                              prev.filter((_, idx) => idx !== i)
+                            );
+                            setImagePreviews((prev) =>
+                              prev.filter((_, idx) => idx !== i)
+                            );
+                          }}
+                          className="h-5 w-5 bg-white rounded-full absolute -top-0.5 -right-0.5 border"
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </ScrollArea>
                 </div>
               )}
             </div>
+
+            {isUploading && (
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2">
               <Button
@@ -164,13 +208,17 @@ export const AddProductDialog = ({
                 variant="ghost"
                 onClick={() => {
                   setOpen(false);
+                  form.reset();
                   setImages([]);
                   setImagePreviews([]);
+                  setUploadProgress(0);
                 }}
               >
                 Cancel
               </Button>
-              <Button type="submit">Add Product</Button>
+              <Button type="submit" disabled={isUploading}>
+                {isUploading ? "Uploading..." : "Add Product"}
+              </Button>
             </div>
           </form>
         </Form>
