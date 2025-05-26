@@ -27,7 +27,7 @@ import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -39,11 +39,11 @@ type FormValues = z.infer<typeof formSchema>;
 export const AddProductDialog = ({
   open,
   setOpen,
-  storeId,
+  storeName,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  storeId: string;
+  storeName: string;
 }) => {
   const trpc = useTRPC();
 
@@ -51,7 +51,6 @@ export const AddProductDialog = ({
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const mutation = useMutation(trpc.products.createProduct.mutationOptions());
-  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,6 +104,8 @@ export const AddProductDialog = ({
     ]);
   };
 
+  console.log(storeName);
+
   const onSubmit = async (data: FormValues) => {
     if (images.length === 0) {
       toast.warning("Please add at least one image.");
@@ -118,18 +119,17 @@ export const AddProductDialog = ({
       return;
     }
 
+    console.log(storeName);
+
     const createProduct = mutation.mutateAsync(
       {
         title: data.title,
         description: data.description,
         images: uploaded.map((images) => images.ufsUrl),
-        storeId: storeId,
+        storeName: storeName,
       },
       {
         onSuccess: (data) => {
-          queryClient.invalidateQueries(
-            trpc.stores.getStoresByUser.queryOptions()
-          );
           console.log(data);
         },
       }
