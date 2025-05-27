@@ -96,12 +96,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddProductDialog } from "@/components/add-product-dialog";
 import { useTRPC } from "@/trpc/client";
-import { toast } from "sonner";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const schema = z.object({
   id: z.string().uuid(),
@@ -201,7 +201,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             <DropdownMenuItem>Make a copy</DropdownMenuItem>
             <DropdownMenuItem>Favorite</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DeleteButton id={row.original.id} name={row.original.title} />
+            <DeleteButton id={row.original.id} />
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -653,30 +653,25 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   );
 }
 
-function DeleteButton({ id, name }: { id: string; name: string }) {
+function DeleteButton({ id }: { id: string }) {
   const trpc = useTRPC();
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(trpc.products.deleteById.mutationOptions());
+  const mutation = useMutation(
+    trpc.products.deleteById.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries(
+          trpc.products.getProductsByStoreName.queryOptions({
+            storeName: data.storeName,
+          })
+        );
+      },
+    })
+  );
 
   const handleDelete = async () => {
-    const deleteProduct = mutation.mutateAsync(
-      {
-        productId: id,
-      },
-      {
-        onSuccess: (data) => {
-          queryClient.invalidateQueries(
-            trpc.products.getProductsByStoreName.queryOptions({
-              storeName: data.storeName,
-            })
-          );
-        },
-      }
-    );
-
-    toast.promise(deleteProduct, {
+    toast.promise(mutation.mutateAsync({ productId: id }), {
       loading: `Deleting product: ${name}`,
       success: `Deleted product: ${name}`,
       error: `Error deleting ${name}`,
