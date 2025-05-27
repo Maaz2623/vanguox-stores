@@ -21,14 +21,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUploadThing } from "@/lib/uploadthing"; // your generated helpers
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
-import { UploadProgressToast } from "./custom-toasts/upload-progress-toast";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -51,8 +50,6 @@ export const AddProductDialog = ({
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [currentFile, setCurrentFile] = useState("");
-  const toastIdRef = useRef<string | number | null>(null);
   const mutation = useMutation(trpc.products.createProduct.mutationOptions());
 
   const form = useForm<FormValues>({
@@ -74,7 +71,7 @@ export const AddProductDialog = ({
 
       console.log("Submitted product:", newProduct);
 
-      toast.success("Product uploaded!");
+      toast.success("Images uploaded!");
       form.reset();
       setImages([]);
       setImagePreviews([]);
@@ -85,24 +82,12 @@ export const AddProductDialog = ({
       console.error("Upload failed:", error);
       toast.error("Upload failed.");
     },
-    onUploadBegin: (fileName: string) => {
-      setCurrentFile(fileName);
+    onUploadBegin: () => {
       setUploadProgress(0); // Reset progress at start
-
-      toastIdRef.current = toast.custom(() => (
-        <UploadProgressToast fileName={fileName} progress={0} />
-      ));
+      toast("Uploading Images");
     },
     onUploadProgress: (p) => {
       setUploadProgress(p);
-
-      // Re-trigger the toast with updated progress
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-        toastIdRef.current = toast.custom(() => (
-          <UploadProgressToast fileName={currentFile} progress={p} />
-        ));
-      }
     },
     uploadProgressGranularity: "fine",
   });
@@ -206,34 +191,36 @@ export const AddProductDialog = ({
                 onChange={handleImageChange}
               />
               {imagePreviews.length > 0 && (
-                <div className="flex h-[200px] flex-wrap gap-2 mt-2">
-                  <ScrollArea className="h-full w-full">
-                    {imagePreviews.map((src, i) => (
-                      <div key={i} className="relative">
-                        <Image
-                          src={src}
-                          alt={`Preview ${i + 1}`}
-                          width={120}
-                          height={120}
-                          className="rounded-md border object-cover aspect-square"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setImages((prev) =>
-                              prev.filter((_, idx) => idx !== i)
-                            );
-                            setImagePreviews((prev) =>
-                              prev.filter((_, idx) => idx !== i)
-                            );
-                          }}
-                          className="h-5 w-5 bg-white rounded-full absolute -top-0.5 -right-0.5 border"
-                        >
-                          <XIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                <div className="flex h-[150px] flex-wrap gap-2 mt-4">
+                  <ScrollArea className="h-full w-full border shadow-inner rounded-lg">
+                    <div className="flex flex-wrap gap-3 p-2">
+                      {imagePreviews.map((src, i) => (
+                        <div key={i} className="relative w-fit">
+                          <Image
+                            src={src}
+                            alt={`Preview ${i + 1}`}
+                            width={120}
+                            height={120}
+                            className="rounded-md border object-cover aspect-square"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setImages((prev) =>
+                                prev.filter((_, idx) => idx !== i)
+                              );
+                              setImagePreviews((prev) =>
+                                prev.filter((_, idx) => idx !== i)
+                              );
+                            }}
+                            className="h-5 w-5 bg-white rounded-full absolute -top-0.5 -right-0.5 border"
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </ScrollArea>
                 </div>
               )}
