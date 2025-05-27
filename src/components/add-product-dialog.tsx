@@ -51,6 +51,7 @@ export const AddProductDialog = ({
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [currentFile, setCurrentFile] = useState("");
   const toastIdRef = useRef<string | number | null>(null);
   const mutation = useMutation(trpc.products.createProduct.mutationOptions());
 
@@ -63,7 +64,6 @@ export const AddProductDialog = ({
   });
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
-    onUploadProgress: (p) => setUploadProgress(p),
     onClientUploadComplete: (res) => {
       const imageUrls = res?.map((f) => f.ufsUrl) ?? [];
 
@@ -86,11 +86,24 @@ export const AddProductDialog = ({
       toast.error("Upload failed.");
     },
     onUploadBegin: (fileName: string) => {
+      setCurrentFile(fileName);
+      setUploadProgress(0); // Reset progress at start
+
       toastIdRef.current = toast.custom(() => (
-        <UploadProgressToast fileName={fileName} progress={uploadProgress} />
+        <UploadProgressToast fileName={fileName} progress={0} />
       ));
     },
+    onUploadProgress: (p) => {
+      setUploadProgress(p);
 
+      // Re-trigger the toast with updated progress
+      if (toastIdRef.current) {
+        toast.dismiss(toastIdRef.current);
+        toastIdRef.current = toast.custom(() => (
+          <UploadProgressToast fileName={currentFile} progress={p} />
+        ));
+      }
+    },
     uploadProgressGranularity: "fine",
   });
 
