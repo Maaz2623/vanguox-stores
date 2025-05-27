@@ -1,64 +1,63 @@
 "use client";
 
-import { IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
+import { IconDashboard } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { PlusIcon } from "lucide-react";
+import { PackageIcon } from "lucide-react";
 import { CreateStoreDialog } from "@/app/(main)/_components/create-store-dialog";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: Icon;
-  }[];
-}) {
+export function NavMain({ storeName }: { storeName: string }) {
   const [open, setOpen] = useState(false);
+
+  const pathname = usePathname();
+
+  const navMain = [
+    {
+      title: "Overview",
+      url: `/stores/${storeName}`,
+      icon: IconDashboard,
+    },
+    {
+      title: "Products",
+      url: `/stores/${storeName}/products`,
+      icon: PackageIcon,
+    },
+  ];
 
   return (
     <>
       <CreateStoreDialog open={open} setOpen={setOpen} />
       <SidebarGroup>
+        <SidebarGroupLabel>Manage</SidebarGroupLabel>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
-            <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton
-                tooltip="Quick Create"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-              >
-                <IconCirclePlusFilled />
-                <span>Quick Create</span>
-              </SidebarMenuButton>
-              <Button
-                onClick={() => setOpen(true)}
-                size="icon"
-                className="size-8 group-data-[collapsible=icon]:opacity-0"
-                variant="outline"
-              >
-                <PlusIcon />
-                <span className="sr-only">Inbox</span>
-              </Button>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarMenu>
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {navMain.map((item) => {
+              const isActive = pathname === item.url;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <Link href={item.url}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className={cn("", isActive && "bg-black/5")}
+                    >
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
