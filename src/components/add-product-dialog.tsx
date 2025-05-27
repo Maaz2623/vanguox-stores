@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
+import { Progress } from "./ui/progress";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -226,14 +227,7 @@ export const AddProductDialog = ({
               )}
             </div>
 
-            {isUploading && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
-            )}
+            {isUploading && <Progress value={uploadProgress} />}
 
             <div className="flex justify-end gap-2">
               <Button
