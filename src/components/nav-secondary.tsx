@@ -10,14 +10,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useParams, usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function NavSecondary({
   ...props
 }: React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const { storeName } = useParams<{
+    storeName: string;
+  }>();
+
+  const pathname = usePathname();
+
   const navSecondary = [
     {
       title: "Settings",
-      url: "#",
+      url: `/stores/${storeName}/settings`,
       icon: IconSettings,
     },
     {
@@ -36,16 +45,22 @@ export function NavSecondary({
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {navSecondary.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {navSecondary.map((item) => {
+            const isActive = pathname === item.url;
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  className={cn("", isActive && "bg-black/5")}
+                >
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

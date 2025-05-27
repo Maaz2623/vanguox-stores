@@ -46,15 +46,16 @@ export function NavMain({ storeName }: { storeName: string }) {
               const isActive = pathname === item.url;
               return (
                 <SidebarMenuItem key={item.title}>
-                  <Link href={item.url}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      className={cn("", isActive && "bg-black/5")}
-                    >
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    className={cn("", isActive && "bg-black/5")}
+                  >
+                    <Link href={item.url}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </Link>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               );
             })}
