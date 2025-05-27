@@ -89,7 +89,6 @@ export const products = pgTable("products", {
     .notNull(),
 });
 
-
 export const productImages = pgTable("product_images", {
   id: uuid("id").notNull().defaultRandom().primaryKey(),
   productId: uuid("product_id")

@@ -1,37 +1,21 @@
-import { AppSidebar } from "@/components/app-sidebar";
+"use client";
 import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 
-import data from "./data.json";
-
-interface PageProps {
-  params: Promise<{
+export default function Page() {
+  const params = useParams<{
     storeName: string;
-  }>;
-}
+  }>();
 
-export default async function Page({ params }: PageProps) {
-  const { storeName } = await params;
+  const trpc = useTRPC();
 
-  return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-                {/* <ChartAreaInteractive /> */}
-              </div>
-              <DataTable data={data} storeName={storeName} />
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+  const { data } = useSuspenseQuery(
+    trpc.products.getProductsByStoreName.queryOptions({
+      storeName: params.storeName,
+    })
   );
+
+  return <DataTable data={data} storeName={params.storeName} />;
 }
