@@ -93,6 +93,6 @@ export const productsRouter = createTRPCRouter({
         }
       }
 
-      return store;
+      return newProduct;
     }),
 });

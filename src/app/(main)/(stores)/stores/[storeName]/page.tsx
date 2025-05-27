@@ -1,21 +1,30 @@
-"use client";
-import { DataTable } from "@/components/data-table";
-import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { ProductsTable } from "./_components/products-table";
+import { Suspense } from "react";
 
-export default function Page() {
-  const params = useParams<{
+interface PageProps {
+  params: Promise<{
     storeName: string;
-  }>();
+  }>;
+}
 
-  const trpc = useTRPC();
+export default async function Page({ params }: PageProps) {
+  const { storeName } = await params;
 
-  const { data } = useSuspenseQuery(
+  const queryClient = getQueryClient();
+
+  void queryClient.prefetchQuery(
     trpc.products.getProductsByStoreName.queryOptions({
-      storeName: params.storeName,
+      storeName: storeName,
     })
   );
 
-  return <DataTable data={data} storeName={params.storeName} />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<div>loading...</div>}>
+        <ProductsTable storeName={storeName} />
+      </Suspense>
+    </HydrationBoundary>
+  );
 }

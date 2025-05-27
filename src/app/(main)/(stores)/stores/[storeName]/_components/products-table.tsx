@@ -94,10 +94,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AddProductDialog } from "./add-product-dialog";
+import { AddProductDialog } from "@/components/add-product-dialog";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 
 export const schema = z.object({
   id: z.string().uuid(),
@@ -230,13 +234,15 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   );
 }
 
-export function DataTable({
-  data,
-  storeName,
-}: {
-  data: z.infer<typeof schema>[];
-  storeName: string;
-}) {
+export function ProductsTable({ storeName }: { storeName: string }) {
+  const trpc = useTRPC();
+
+  const { data } = useSuspenseQuery(
+    trpc.products.getProductsByStoreName.queryOptions({
+      storeName,
+    })
+  );
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -661,7 +667,6 @@ function DeleteButton({ id, name }: { id: string; name: string }) {
       },
       {
         onSuccess: (data) => {
-          console.log(data);
           queryClient.invalidateQueries(
             trpc.products.getProductsByStoreName.queryOptions({
               storeName: data.storeName,

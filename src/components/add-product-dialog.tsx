@@ -132,10 +132,16 @@ export const AddProductDialog = ({
       },
       {
         onSuccess: (data) => {
+          console.log(data);
           queryClient.invalidateQueries(
-            trpc.products.getProductsByStoreName.queryOptions({
-              storeName: data.name,
-            })
+            trpc.products.getProductsByStoreName.queryOptions(
+              {
+                storeName,
+              },
+              {
+                enabled: true,
+              }
+            )
           );
         },
       }

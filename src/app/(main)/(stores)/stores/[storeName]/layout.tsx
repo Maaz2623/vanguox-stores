@@ -2,31 +2,15 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { getQueryClient, trpc } from "@/trpc/server";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { Suspense } from "react";
 
 export default async function StoreNameLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{
-    storeName: string;
-  }>;
 }) {
-  const { storeName } = await params;
-
-  const queryClient = getQueryClient();
-
-  void queryClient.prefetchQuery(
-    trpc.products.getProductsByStoreName.queryOptions({
-      storeName: storeName,
-    })
-  );
-
   return (
     <SidebarProvider>
+      
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
@@ -36,9 +20,7 @@ export default async function StoreNameLayout({
               <SectionCards />
               <div className="px-4 lg:px-6">
                 {/* <ChartAreaInteractive /> */}
-                <HydrationBoundary state={dehydrate(queryClient)}>
-                  <Suspense>{children}</Suspense>
-                </HydrationBoundary>
+                {children}
               </div>
             </div>
           </div>
