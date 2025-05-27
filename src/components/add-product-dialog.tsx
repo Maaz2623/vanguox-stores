@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
+import { UploadProgressToast } from "./custom-toasts/upload-progress-toast";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -86,15 +87,7 @@ export const AddProductDialog = ({
     },
     onUploadBegin: (fileName: string) => {
       toastIdRef.current = toast.custom(() => (
-        <div className="w-[300px] p-4 bg-white rounded shadow">
-          <p className="text-sm font-medium mb-2">Uploading: {fileName}</p>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-        </div>
+        <UploadProgressToast fileName={fileName} progress={uploadProgress} />
       ));
     },
 
