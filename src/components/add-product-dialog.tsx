@@ -21,7 +21,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUploadThing } from "@/lib/uploadthing"; // your generated helpers
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ export const AddProductDialog = ({
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const toastIdRef = useRef<string | number | null>(null);
   const mutation = useMutation(trpc.products.createProduct.mutationOptions());
 
   const form = useForm<FormValues>({
@@ -84,7 +85,17 @@ export const AddProductDialog = ({
       toast.error("Upload failed.");
     },
     onUploadBegin: (fileName: string) => {
-      toast("Uploading started for: " + fileName);
+      toastIdRef.current = toast.custom(() => (
+        <div className="w-[300px] p-4 bg-white rounded shadow">
+          <p className="text-sm font-medium mb-2">Uploading: {fileName}</p>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        </div>
+      ));
     },
 
     uploadProgressGranularity: "fine",
