@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
   ) {
     const storeName = pathSegments[1]; // 'tsf'
     const subdomainUrl = new URL(req.url);
-    subdomainUrl.hostname = `${storeName}.localhost`;
+    subdomainUrl.hostname = `${storeName}.vanguox.com`;
     subdomainUrl.pathname = "/"; // Redirect to root of subdomain
     return NextResponse.redirect(subdomainUrl);
   }
