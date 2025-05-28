@@ -2,6 +2,15 @@
 
 import * as React from "react";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
   DndContext,
   KeyboardSensor,
   MouseSensor,
@@ -96,11 +105,12 @@ import { AddProductDialog } from "./add-product-dialog";
 import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TrashIcon } from "lucide-react";
+import { ImagesIcon, TrashIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,6 +122,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Image from "next/image";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const schema = z.object({
   id: z.string().uuid(),
@@ -192,7 +204,15 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
   },
   {
+    id: "images",
+    header: "Images",
+    cell: ({ row }) => {
+      return <ImagesViewer productId={row.original.id} />;
+    },
+  },
+  {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       return (
         <DropdownMenu>
@@ -612,6 +632,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     </Drawer>
   );
 }
+
 function DeleteButton({ id, name }: { id: string; name: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -668,5 +689,50 @@ function DeleteButton({ id, name }: { id: string; name: string }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function ImagesViewer({ productId }: { productId: string }) {
+  const trpc = useTRPC();
+
+  const { data } = useQuery(
+    trpc.productImages.getImagesByProductId.queryOptions({
+      productId,
+    })
+  );
+
+  if (!data) return <div>loading...</div>;
+
+  console.log(data);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant={`outline`} size={`icon`}>
+          <ImagesIcon />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Produc Images</DialogTitle>
+          <DialogDescription>These are your product images</DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="h-full w-full border shadow-inner rounded-lg">
+          <div className="flex flex-wrap gap-3 p-2">
+            {data.map((src, i) => (
+              <div key={i} className="relative w-fit">
+                <Image
+                  src={src.url}
+                  alt={`Preview ${i + 1}`}
+                  width={120}
+                  height={120}
+                  className="rounded-md border object-cover aspect-square"
+                />
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }
