@@ -39,7 +39,31 @@ export function NavMain({ storeName }: { storeName: string }) {
     <>
       <CreateStoreDialog open={open} setOpen={setOpen} />
       <SidebarGroup>
-        <SidebarGroupLabel>Manage</SidebarGroupLabel>
+        <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+        <SidebarGroupContent className="flex flex-col gap-2">
+          <SidebarMenu>
+            {navMain.map((item) => {
+              const isActive = pathname === item.url;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    className={cn("", isActive && "bg-black/5")}
+                  >
+                    <Link href={item.url}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      <SidebarGroup>
+        <SidebarGroupLabel>Analytics</SidebarGroupLabel>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             {navMain.map((item) => {
