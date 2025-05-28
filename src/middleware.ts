@@ -1,29 +1,41 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
 
 export async function middleware(req: NextRequest) {
   const session = await auth.api.getSession(req);
-  const pathname = req.nextUrl.pathname;
+  const url = req.nextUrl;
+  const pathname = url.pathname;
+  const host = req.headers.get("host") || "";
 
-  // Check protected routes (optional, based on your needs)
-  const isProtected =
-    pathname.startsWith("/") || pathname.startsWith("/stores");
+  const isSubdomain = host.split(".").length > 2 && !host.includes("localhost");
+  const baseDomain = "vanguox.com";
+
+  // 🔐 Protect routes
+  const isProtected = pathname === "/" || pathname.startsWith("/stores");
   if (isProtected && !session?.user) {
     const signInUrl = new URL("/auth/sign-in", req.url);
     return NextResponse.redirect(signInUrl);
   }
 
-  // Redirect if path matches /stores/:store/shop exactly
-  const pathSegments = pathname.split("/").filter(Boolean); // ['stores', 'tsf', 'shop']
+  // 🔁 If you're on a subdomain and trying to access /stores/* or root, redirect to vanguox.com
+  if (isSubdomain && (pathname === "/" || pathname.startsWith("/stores"))) {
+    const rootUrl = new URL(req.url);
+    rootUrl.hostname = baseDomain;
+    return NextResponse.redirect(rootUrl);
+  }
+
+  // 🔁 If you're on vanguox.com and accessing /stores/:store/shop, redirect to :store.vanguox.com
+  const segments = pathname.split("/").filter(Boolean); // ['stores', 'tsf', 'shop']
   if (
-    pathSegments.length === 3 &&
-    pathSegments[0] === "stores" &&
-    pathSegments[2] === "shop"
+    !isSubdomain &&
+    segments.length === 3 &&
+    segments[0] === "stores" &&
+    segments[2] === "shop"
   ) {
-    const storeName = pathSegments[1]; // 'tsf'
+    const store = segments[1];
     const subdomainUrl = new URL(req.url);
-    subdomainUrl.hostname = `${storeName}.vanguox.com`;
-    subdomainUrl.pathname = "/"; // Redirect to root of subdomain
+    subdomainUrl.hostname = `${store}.${baseDomain}`;
+    subdomainUrl.pathname = "/"; // or preserve `/shop` if needed
     return NextResponse.redirect(subdomainUrl);
   }
 
