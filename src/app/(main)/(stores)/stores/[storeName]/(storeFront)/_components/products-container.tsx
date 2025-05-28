@@ -16,7 +16,7 @@ export const ProductsContainer = ({ storeName }: { storeName: string }) => {
   console.log(data);
 
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8 flex-wrap justify-center">
       {data.map((product) => (
         <ProductCard
           key={product.id}

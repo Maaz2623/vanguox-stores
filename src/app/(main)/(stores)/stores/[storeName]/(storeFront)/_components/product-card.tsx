@@ -23,7 +23,7 @@ export const ProductCard = ({
   imageUrl,
 }: ProductCardProps) => {
   return (
-    <div className="group relative w-[320px] max-w-sm overflow-hidden rounded-3xl border border-zinc-200 bg-white p-4 transition-all duration-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="group relative w-[280px] max-w-sm overflow-hidden rounded-3xl border border-zinc-200 bg-white p-4 transition-all duration-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
       <div className="relative h-48 w-full overflow-hidden rounded-2xl">
         <Image
           src={imageUrl}
