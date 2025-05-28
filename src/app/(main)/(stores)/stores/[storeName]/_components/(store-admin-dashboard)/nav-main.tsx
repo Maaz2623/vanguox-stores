@@ -33,16 +33,6 @@ export function NavMain({ storeName }: { storeName: string }) {
       url: `/stores/${storeName}/orders`,
       icon: Package2Icon,
     },
-    {
-      title: "Coupons",
-      url: `/stores/${storeName}/coupons`,
-      icon: BadgePercentIcon,
-    },
-    {
-      title: "Memberships",
-      url: `/stores/${storeName}/memberships`,
-      icon: IdCardIcon,
-    },
   ];
 
   const analytics = [
@@ -58,6 +48,16 @@ export function NavMain({ storeName }: { storeName: string }) {
       title: "Products",
       url: `/stores/${storeName}/products`,
       icon: PackageIcon,
+    },
+    {
+      title: "Coupons",
+      url: `/stores/${storeName}/coupons`,
+      icon: BadgePercentIcon,
+    },
+    {
+      title: "Memberships",
+      url: `/stores/${storeName}/memberships`,
+      icon: IdCardIcon,
     },
   ];
 
