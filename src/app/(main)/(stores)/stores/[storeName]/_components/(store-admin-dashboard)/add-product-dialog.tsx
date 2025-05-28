@@ -25,10 +25,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Progress } from "./ui/progress";
+import { Progress } from "@/components/ui/progress";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),

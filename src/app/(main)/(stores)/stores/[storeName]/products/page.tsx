@@ -1,6 +1,6 @@
 import React from "react";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { ProductsTable } from "../_components/products-table";
+import { ProductsTable } from "../_components/(store-admin-dashboard)/products-table";
 import { Suspense } from "react";
 import { getQueryClient, trpc } from "@/trpc/server";
 

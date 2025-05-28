@@ -1,5 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
+import { AppSidebar } from "./_components/(store-admin-dashboard)/app-sidebar";
+import { SiteHeader } from "./_components/(store-admin-dashboard)/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default async function StoreNameLayout({

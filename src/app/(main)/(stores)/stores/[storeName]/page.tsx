@@ -1,4 +1,4 @@
-import { SectionCards } from "@/components/section-cards";
+import { SectionCards } from "./_components/(store-admin-dashboard)/section-cards";
 
 interface PageProps {
   params: Promise<{

@@ -92,7 +92,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AddProductDialog } from "@/components/add-product-dialog";
+import { AddProductDialog } from "./add-product-dialog";
 import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
