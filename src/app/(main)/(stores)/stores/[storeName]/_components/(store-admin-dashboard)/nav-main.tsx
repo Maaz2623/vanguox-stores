@@ -10,7 +10,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { PackageIcon } from "lucide-react";
+import {
+  BadgePercentIcon,
+  IdCardIcon,
+  Package2Icon,
+  PackageIcon,
+} from "lucide-react";
 import { CreateStoreDialog } from "@/app/(main)/_components/create-store-dialog";
 import { useState } from "react";
 import Link from "next/link";
@@ -26,7 +31,17 @@ export function NavMain({ storeName }: { storeName: string }) {
     {
       title: "Orders",
       url: `/stores/${storeName}/orders`,
-      icon: IconDashboard,
+      icon: Package2Icon,
+    },
+    {
+      title: "Coupons",
+      url: `/stores/${storeName}/coupons`,
+      icon: BadgePercentIcon,
+    },
+    {
+      title: "Memberships",
+      url: `/stores/${storeName}/memberships`,
+      icon: IdCardIcon,
     },
   ];
 
