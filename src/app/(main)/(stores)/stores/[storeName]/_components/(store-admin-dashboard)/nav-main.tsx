@@ -22,12 +22,23 @@ export function NavMain({ storeName }: { storeName: string }) {
 
   const pathname = usePathname();
 
-  const navMain = [
+  const commerce = [
+    {
+      title: "Orders",
+      url: `/stores/${storeName}/orders`,
+      icon: IconDashboard,
+    },
+  ];
+
+  const analytics = [
     {
       title: "Overview",
       url: `/stores/${storeName}`,
       icon: IconDashboard,
     },
+  ];
+
+  const inventory = [
     {
       title: "Products",
       url: `/stores/${storeName}/products`,
@@ -42,7 +53,7 @@ export function NavMain({ storeName }: { storeName: string }) {
         <SidebarGroupLabel>Analytics</SidebarGroupLabel>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
-            {navMain.map((item) => {
+            {analytics.map((item) => {
               const isActive = pathname === item.url;
               return (
                 <SidebarMenuItem key={item.title}>
@@ -63,10 +74,34 @@ export function NavMain({ storeName }: { storeName: string }) {
         </SidebarGroupContent>
       </SidebarGroup>
       <SidebarGroup>
-        <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+        <SidebarGroupLabel>Manage Commerce</SidebarGroupLabel>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
-            {navMain.map((item) => {
+            {commerce.map((item) => {
+              const isActive = pathname === item.url;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    className={cn("", isActive && "bg-black/5")}
+                  >
+                    <Link href={item.url}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      <SidebarGroup>
+        <SidebarGroupLabel>Inventory</SidebarGroupLabel>
+        <SidebarGroupContent className="flex flex-col gap-2">
+          <SidebarMenu>
+            {inventory.map((item) => {
               const isActive = pathname === item.url;
               return (
                 <SidebarMenuItem key={item.title}>
