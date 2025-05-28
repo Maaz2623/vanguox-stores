@@ -1,5 +1,7 @@
 import { getQueryClient, trpc } from "@/trpc/server";
-import React from "react";
+import React, { Suspense } from "react";
+import { ProductsContainer } from "../_components/products-container";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 interface PageProps {
   params: Promise<{
@@ -13,12 +15,20 @@ const ShopPage = async ({ params }: PageProps) => {
   const queryClient = getQueryClient();
 
   void queryClient.prefetchQuery(
-    trpc.products.getProductsByStoreName.queryOptions({
+    trpc.products.getProductCardDetails.queryOptions({
       storeName,
     })
   );
 
-  return <div>Shop Page</div>;
+  return (
+    <div>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <Suspense fallback={<div>loading...</div>}>
+          <ProductsContainer storeName={storeName} />
+        </Suspense>
+      </HydrationBoundary>
+    </div>
+  );
 };
 
 export default ShopPage;
