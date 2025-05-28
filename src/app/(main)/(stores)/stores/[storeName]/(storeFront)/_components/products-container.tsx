@@ -19,12 +19,13 @@ export const ProductsContainer = ({ storeName }: { storeName: string }) => {
     <div className="flex gap-8 flex-wrap justify-center">
       {data.map((product) => (
         <ProductCard
+          id={product.id}
           key={product.id}
           title={product.title}
           description={product.description}
           price={"200"}
           rating={5}
-          storeId={product.storeName}
+          storeName={product.storeName}
           imageUrl={product.images[0]}
         />
       ))}

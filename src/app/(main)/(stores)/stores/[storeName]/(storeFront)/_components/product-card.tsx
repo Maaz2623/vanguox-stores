@@ -4,24 +4,46 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRightFromSquareIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   title: string;
   description: string;
   price: string;
   rating: number; // from 0 to 5
-  storeId: string;
+  storeName: string;
   imageUrl: string;
+  id: string;
 }
 
 export const ProductCard = ({
+  id,
   title,
   description,
   price,
   rating,
-  storeId,
+  storeName,
   imageUrl,
 }: ProductCardProps) => {
+  const trpc = useTRPC();
+
+  const mutation = useMutation(trpc.carts.addToCart.mutationOptions());
+
+  const handleAddToCart = () => {
+    const addToCart = mutation.mutateAsync({
+      storeName,
+      productId: id,
+    });
+
+    toast.promise(addToCart, {
+      loading: "Creating your store",
+      success: "Store has been created. Redirecting...",
+      error: "Something went wrong",
+    });
+  };
+
   return (
     <div className="group relative w-[280px] max-w-sm overflow-hidden rounded-3xl border border-zinc-200 bg-white p-4 transition-all duration-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
       <div className="relative h-48 w-full overflow-hidden rounded-2xl">
@@ -54,7 +76,7 @@ export const ProductCard = ({
           </div>
 
           <span className="text-xs text-zinc-400 dark:text-zinc-500">
-            {storeId}
+            {storeName}
           </span>
         </div>
 
@@ -62,7 +84,10 @@ export const ProductCard = ({
           <span className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
             ${price}
           </span>
-          <Button className="rounded-full px-5 py-2 text-sm font-medium">
+          <Button
+            onClick={handleAddToCart}
+            className="rounded-full px-5 py-2 text-sm font-medium"
+          >
             Go to store <ArrowUpRightFromSquareIcon />
           </Button>
         </div>

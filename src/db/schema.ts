@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  integer,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -97,6 +104,34 @@ export const productImages = pgTable("product_images", {
   url: text("url").notNull(), // The URL/path of the image (could be a string or text)
   altText: text("alt_text").default(""), // Optional alt text for accessibility
   createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const carts = pgTable("carts", {
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
+  storeId: uuid("store_id")
+    .references(() => stores.id, { onDelete: "cascade" })
+    .notNull(),
+  userId: text("user").default("maaz").notNull(),
+  paid: boolean("paid").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  delivered: boolean("delivered").default(false).notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const cartItems = pgTable("cart_items", {
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
+  cartId: uuid("cart_id")
+    .references(() => carts.id, { onDelete: "cascade" })
+    .notNull(),
+  productId: uuid("product_id")
+    .references(() => products.id, { onDelete: "cascade" })
+    .notNull(),
+  quantity: integer("quantity").default(1).notNull(),
+  addedAt: timestamp("added_at")
     .$defaultFn(() => new Date())
     .notNull(),
 });
