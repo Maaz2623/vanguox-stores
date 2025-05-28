@@ -30,7 +30,7 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
     })
   );
 
-  if (isLoading) return <div>loading...</div>;
+  if (isLoading || !data) return <div>loading...</div>;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

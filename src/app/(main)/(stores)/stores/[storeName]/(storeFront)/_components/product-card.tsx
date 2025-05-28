@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRightFromSquareIcon } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
@@ -52,8 +51,8 @@ export const ProductCard = ({
     );
 
     toast.promise(addToCart, {
-      loading: "Creating your store",
-      success: "Store has been created. Redirecting...",
+      loading: "Adding product to cart.",
+      success: "Product has been added to cart",
       error: "Something went wrong",
     });
   };
@@ -102,7 +101,7 @@ export const ProductCard = ({
             onClick={handleAddToCart}
             className="rounded-full px-5 py-2 text-sm font-medium"
           >
-            Go to store <ArrowUpRightFromSquareIcon />
+            Add to cart
           </Button>
         </div>
       </div>

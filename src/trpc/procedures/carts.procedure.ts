@@ -22,6 +22,17 @@ export const cartsRouter = createTRPCRouter({
         .from(carts)
         .where(and(eq(carts.storeId, store.id), eq(carts.isActive, true)));
 
+      if (!cart) {
+        const [newCart] = await db
+          .insert(carts)
+          .values({
+            storeId: store.id,
+          })
+          .returning();
+
+        return newCart;
+      }
+
       return cart;
     }),
   getCartItemsByCartId: baseProcedure
