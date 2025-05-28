@@ -20,6 +20,7 @@ const ShopPage = async ({ params }: PageProps) => {
     })
   );
 
+ 
   return (
     <div>
       <HydrationBoundary state={dehydrate(queryClient)}>

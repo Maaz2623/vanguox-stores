@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRightFromSquareIcon } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
 
@@ -29,13 +29,27 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const trpc = useTRPC();
 
+  const queryClient = useQueryClient();
+
   const mutation = useMutation(trpc.carts.addToCart.mutationOptions());
 
   const handleAddToCart = () => {
-    const addToCart = mutation.mutateAsync({
-      storeName,
-      productId: id,
-    });
+    const addToCart = mutation.mutateAsync(
+      {
+        storeName,
+        productId: id,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("refreshing cart items");
+          queryClient.invalidateQueries(
+            trpc.carts.getCartItemsByCartId.queryOptions({
+              cartId: data.cartId,
+            })
+          );
+        },
+      }
+    );
 
     toast.promise(addToCart, {
       loading: "Creating your store",

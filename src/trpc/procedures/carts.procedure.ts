@@ -5,6 +5,39 @@ import { cartItems, carts, stores } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export const cartsRouter = createTRPCRouter({
+  getCartByStoreName: baseProcedure
+    .input(
+      z.object({
+        storeName: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(eq(stores.name, input.storeName));
+
+      const [cart] = await db
+        .select()
+        .from(carts)
+        .where(and(eq(carts.storeId, store.id), eq(carts.isActive, true)));
+
+      return cart;
+    }),
+  getCartItemsByCartId: baseProcedure
+    .input(
+      z.object({
+        cartId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const items = await db
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.cartId, input.cartId));
+
+      return items;
+    }),
   addToCart: baseProcedure
     .input(
       z.object({

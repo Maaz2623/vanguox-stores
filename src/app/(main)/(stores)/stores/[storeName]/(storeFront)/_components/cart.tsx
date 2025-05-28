@@ -1,3 +1,4 @@
+"use client";
 import {
   Sheet,
   SheetContent,
@@ -5,6 +6,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useTRPC } from "@/trpc/client";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 interface CartProps {
   open: boolean;
@@ -13,6 +16,22 @@ interface CartProps {
 }
 
 export const Cart = ({ open, setOpen, storeName }: CartProps) => {
+  const trpc = useTRPC();
+
+  const { data: cart } = useSuspenseQuery(
+    trpc.carts.getCartByStoreName.queryOptions({
+      storeName,
+    })
+  );
+
+  const { data, isLoading } = useQuery(
+    trpc.carts.getCartItemsByCartId.queryOptions({
+      cartId: cart.id,
+    })
+  );
+
+  if (isLoading) return <div>loading...</div>;
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent>
@@ -23,7 +42,7 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
             account and remove your data from our servers.
           </SheetDescription>
         </SheetHeader>
-        {JSON.stringify(storeName)}
+        {JSON.stringify(data)}
       </SheetContent>
     </Sheet>
   );
