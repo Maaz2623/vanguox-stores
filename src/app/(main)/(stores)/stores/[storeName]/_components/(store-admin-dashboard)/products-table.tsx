@@ -111,19 +111,9 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ImagesIcon, TrashIcon } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 
 export const schema = z.object({
   id: z.string().uuid(),
@@ -636,7 +626,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 function DeleteButton({ id, name }: { id: string; name: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [open, setOpen] = React.useState(false);
 
   const mutation = useMutation(
     trpc.products.deleteById.mutationOptions({
@@ -646,7 +635,6 @@ function DeleteButton({ id, name }: { id: string; name: string }) {
             storeName: data.storeName,
           })
         );
-        setOpen(false);
       },
     })
   );
@@ -660,35 +648,19 @@ function DeleteButton({ id, name }: { id: string; name: string }) {
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <DropdownMenuItem
-          className="text-rose-500 hover:text-rose-500"
-          onSelect={(e) => e.preventDefault()}
-        >
-          <TrashIcon className="text-rose-500 mr-2 h-4 w-4" />
-          Delete
-        </DropdownMenuItem>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. It will permanently delete{" "}
-            <b>{name}</b>.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-rose-500 hover:bg-rose-600"
-            onClick={handleDelete}
-          >
-            Yes, delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmationDialog
+      title="Delete Store"
+      description="This action cannot be undone. It will permanently delete your store."
+      onConfirm={handleDelete}
+    >
+      <DropdownMenuItem
+        className="text-rose-500 hover:text-rose-500"
+        onSelect={(e) => e.preventDefault()}
+      >
+        <TrashIcon className="text-rose-500 mr-2 h-4 w-4" />
+        Delete
+      </DropdownMenuItem>
+    </ConfirmationDialog>
   );
 }
 
