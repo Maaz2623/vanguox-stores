@@ -6,6 +6,44 @@ import { desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const productsRouter = createTRPCRouter({
+  getProductById: baseProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const productsWithImages = await db
+        .select({
+          productId: products.id,
+          title: products.title,
+          description: products.description,
+          imageUrl: productImages.url,
+        })
+        .from(products)
+        .leftJoin(productImages, eq(products.id, productImages.productId))
+        .where(eq(products.id, input.productId));
+
+      if (!productsWithImages.length) {
+        return null;
+      }
+
+      const grouped = {
+        id: productsWithImages[0].productId,
+        title: productsWithImages[0].title,
+        description: productsWithImages[0].description,
+        images: [] as string[],
+      };
+
+      for (const item of productsWithImages) {
+        if (item.imageUrl) {
+          grouped.images.push(item.imageUrl);
+        }
+      }
+
+      return grouped;
+    }),
+
   getProductCardDetails: baseProcedure
     .input(z.object({ storeName: z.string() }))
     .query(async ({ input }) => {

@@ -5,6 +5,9 @@ import { cartItems, carts, stores } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export const cartsRouter = createTRPCRouter({
+  getCartDetails: baseProcedure.query(async ({}) => {
+
+  }),
   getCartByStoreName: baseProcedure
     .input(
       z.object({
