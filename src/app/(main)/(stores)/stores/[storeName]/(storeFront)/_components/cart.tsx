@@ -53,15 +53,17 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
               Your cart is empty.
             </div>
           ) : (
-            <ScrollArea className="flex-1 pr-2 h-[200px]">
-              <div className="flex flex-col gap-y-4">
-                {cartItems.map((item) => (
-                  <CartProductCard key={item.id} productId={item.productId} />
-                ))}
-              </div>
-            </ScrollArea>
+            <>
+              <ScrollArea className="flex-1 pr-2 h-[200px]">
+                <div className="flex flex-col gap-y-4">
+                  {cartItems.map((item) => (
+                    <CartProductCard key={item.id} productId={item.productId} />
+                  ))}
+                </div>
+              </ScrollArea>
+              <Separator />
+            sss</>
           )}
-          <Separator />
 
           {cartItems.length > 0 && (
             <>
