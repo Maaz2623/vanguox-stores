@@ -73,7 +73,6 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
                 </div>
               </ScrollArea>
               <Separator />
-              sss
             </>
           )}
 
