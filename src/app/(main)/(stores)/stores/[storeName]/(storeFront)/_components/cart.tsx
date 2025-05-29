@@ -182,14 +182,14 @@ const CartProductCard = ({
   return (
     <div
       key={product.id}
-      className="flex gap-4 bg-gray-100 px-3 py-2 rounded-lg items-center"
+      className="flex gap-4 border px-3 py-2 rounded-lg items-center"
     >
       <Image
         src={product.images[0]}
         alt={product.title}
         width={50}
         height={50}
-        className="w-16 h-16 rounded-md object-cover"
+        className="w-16 h-16 rounded-md object-cover border"
       />
       <div className="flex-1">
         <h4 className="font-medium text-sm">{product.title}</h4>

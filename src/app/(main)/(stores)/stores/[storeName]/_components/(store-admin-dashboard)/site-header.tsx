@@ -6,11 +6,29 @@ import { ShoppingCartIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Cart } from "../../(storeFront)/_components/cart";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 export function SiteHeader({ storeName }: { storeName: string }) {
   const pathname = usePathname();
 
   const [cartOpen, setCartOpen] = useState(false);
+
+  const trpc = useTRPC();
+
+  const { data: cart } = useSuspenseQuery(
+    trpc.carts.getCartByStoreName.queryOptions({
+      storeName,
+    })
+  );
+
+  const { data: cartItems } = useQuery(
+    trpc.carts.getCartItemsByCartId.queryOptions({
+      cartId: cart.id,
+    })
+  );
+
+  if (!cart || !cartItems) return <div>loading...</div>;
 
   const isActive = pathname.includes("/shop");
 
@@ -30,8 +48,14 @@ export function SiteHeader({ storeName }: { storeName: string }) {
           <Button
             variant={`outline`}
             size={`icon`}
+            className="relative"
             onClick={() => setCartOpen(true)}
           >
+            {cartItems.length !== 0 && (
+              <span className="absolute text-xs bg-destructive rounded-full p-0.5 font-semibold text-white size-5 -top-2 -right-2">
+                {cartItems.length}
+              </span>
+            )}
             <ShoppingCartIcon />
           </Button>
         </>
