@@ -10,9 +10,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useTRPC } from "@/trpc/client";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface CartProps {
   open: boolean;
@@ -57,12 +63,18 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
               <ScrollArea className="flex-1 pr-2 h-[200px]">
                 <div className="flex flex-col gap-y-4">
                   {cartItems.map((item) => (
-                    <CartProductCard key={item.id} productId={item.productId} />
+                    <CartProductCard
+                      storeName={storeName}
+                      quantity={item.quantity}
+                      key={item.id}
+                      productId={item.productId}
+                    />
                   ))}
                 </div>
               </ScrollArea>
               <Separator />
-            sss</>
+              sss
+            </>
           )}
 
           {cartItems.length > 0 && (
@@ -89,11 +101,25 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
 };
 
 type CartProductCard = {
+  storeName: string;
   productId: string;
+  quantity: number;
 };
 
-const CartProductCard = ({ productId }: CartProductCard) => {
+const CartProductCard = ({
+  productId,
+  quantity,
+  storeName,
+}: CartProductCard) => {
   const trpc = useTRPC();
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation(trpc.carts.addToCart.mutationOptions());
+
+  const decrementMutation = useMutation(
+    trpc.carts.decrementFromCart.mutationOptions()
+  );
 
   const { data: product } = useQuery(
     trpc.products.getProductById.queryOptions({
@@ -102,6 +128,56 @@ const CartProductCard = ({ productId }: CartProductCard) => {
   );
 
   if (!product) return <div>loading...</div>;
+
+  const incrementProduct = () => {
+    const addToCart = mutation.mutateAsync(
+      {
+        storeName,
+        productId: product.id,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("refreshing cart items");
+          queryClient.invalidateQueries(
+            trpc.carts.getCartItemsByCartId.queryOptions({
+              cartId: data.cartId,
+            })
+          );
+        },
+      }
+    );
+
+    toast.promise(addToCart, {
+      loading: "Adding product to cart.",
+      success: "Product has been added to cart",
+      error: "Something went wrong",
+    });
+  };
+
+  const decrementProduct = () => {
+    const removeFromCart = decrementMutation.mutateAsync(
+      {
+        storeName,
+        productId: product.id,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("refreshing cart items");
+          queryClient.invalidateQueries(
+            trpc.carts.getCartItemsByCartId.queryOptions({
+              cartId: data.cartId,
+            })
+          );
+        },
+      }
+    );
+
+    toast.promise(removeFromCart, {
+      loading: "Updating cart...",
+      success: "Product quantity updated",
+      error: "Something went wrong",
+    });
+  };
 
   return (
     <div
@@ -118,19 +194,31 @@ const CartProductCard = ({ productId }: CartProductCard) => {
       <div className="flex-1">
         <h4 className="font-medium text-sm">{product.title}</h4>
         <div className="text-xs text-muted-foreground">
-          ₹{20} × {2}
+          ₹{product.price} × {quantity}
         </div>
         <div className="flex items-center gap-2 mt-1">
-          <Button size="icon" variant="ghost" className="hover:bg-white">
+          <Button
+            onClick={decrementProduct}
+            size="icon"
+            variant="ghost"
+            className="hover:bg-white"
+          >
             <MinusIcon className="w-4 h-4 " />
           </Button>
-          <span className="text-sm">2</span>
-          <Button size="icon" variant="ghost" className="hover:bg-white">
+          <span className="text-sm">{quantity}</span>
+          <Button
+            onClick={incrementProduct}
+            size="icon"
+            variant="ghost"
+            className="hover:bg-white"
+          >
             <PlusIcon className="w-4 h-4 " />
           </Button>
         </div>
       </div>
-      <div className="font-medium text-sm">₹2000</div>
+      <div className="font-medium text-sm">
+        ₹{Number(product.price) * quantity}
+      </div>
     </div>
   );
 };

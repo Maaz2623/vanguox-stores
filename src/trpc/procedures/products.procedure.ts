@@ -18,6 +18,7 @@ export const productsRouter = createTRPCRouter({
           productId: products.id,
           title: products.title,
           description: products.description,
+          price: products.price,
           imageUrl: productImages.url,
         })
         .from(products)
@@ -32,6 +33,7 @@ export const productsRouter = createTRPCRouter({
         id: productsWithImages[0].productId,
         title: productsWithImages[0].title,
         description: productsWithImages[0].description,
+        price: productsWithImages[0].price,
         images: [] as string[],
       };
 
