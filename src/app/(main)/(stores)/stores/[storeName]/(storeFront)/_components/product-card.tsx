@@ -10,7 +10,7 @@ import { toast } from "sonner";
 interface ProductCardProps {
   title: string;
   description: string;
-  price: string;
+  price: number;
   rating: number; // from 0 to 5
   storeName: string;
   imageUrl: string;
@@ -95,7 +95,7 @@ export const ProductCard = ({
 
         <div className="flex items-center justify-between mt-3">
           <span className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
-            ${price}
+            ₹{price}
           </span>
           <Button
             onClick={handleAddToCart}

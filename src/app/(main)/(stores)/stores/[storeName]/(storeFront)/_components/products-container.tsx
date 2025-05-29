@@ -23,7 +23,7 @@ export const ProductsContainer = ({ storeName }: { storeName: string }) => {
           key={product.id}
           title={product.title}
           description={product.description}
-          price={"200"}
+          price={Number(product.price)}
           rating={5}
           storeName={product.storeName}
           imageUrl={product.images[0]}

@@ -2,11 +2,10 @@ import { z } from "zod";
 import { baseProcedure, createTRPCRouter } from "../init";
 import { db } from "@/db";
 import { cartItems, carts, stores } from "@/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const cartsRouter = createTRPCRouter({
-  getCartDetails: baseProcedure.query(async ({}) => {}),
   getCartByStoreName: baseProcedure
     .input(
       z.object({
@@ -47,7 +46,8 @@ export const cartsRouter = createTRPCRouter({
       const items = await db
         .select()
         .from(cartItems)
-        .where(eq(cartItems.cartId, input.cartId));
+        .where(eq(cartItems.cartId, input.cartId))
+        .orderBy(desc(cartItems.addedAt));
 
       return items;
     }),
