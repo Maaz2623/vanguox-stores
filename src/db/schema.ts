@@ -5,6 +5,7 @@ import {
   boolean,
   uuid,
   integer,
+  decimal,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -85,6 +86,7 @@ export const products = pgTable("products", {
   id: uuid("id").notNull().defaultRandom().primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   storeId: uuid("store_id")
     .references(() => stores.id, { onDelete: "cascade" })
     .notNull(),

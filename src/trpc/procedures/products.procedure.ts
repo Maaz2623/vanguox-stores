@@ -142,6 +142,7 @@ export const productsRouter = createTRPCRouter({
       z.object({
         images: z.array(z.string()),
         title: z.string(),
+        price: z.coerce.number().positive(),
         description: z.string(),
         storeName: z.string(),
       })
@@ -163,6 +164,7 @@ export const productsRouter = createTRPCRouter({
         .values({
           title: input.title,
           description: input.description,
+          price: input.price.toString(),
           storeId: store.id,
         })
         .returning();

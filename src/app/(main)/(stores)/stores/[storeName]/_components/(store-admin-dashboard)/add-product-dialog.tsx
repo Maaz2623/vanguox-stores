@@ -33,6 +33,7 @@ import { Progress } from "@/components/ui/progress";
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.coerce.number().positive(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,6 +60,7 @@ export const AddProductDialog = ({
     defaultValues: {
       title: "",
       description: "",
+      price: 0,
     },
   });
 
@@ -127,6 +129,7 @@ export const AddProductDialog = ({
       {
         title: data.title,
         description: data.description,
+        price: data.price,
         images: uploaded.map((images) => images.ufsUrl),
         storeName: storeName,
       },
@@ -165,19 +168,34 @@ export const AddProductDialog = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Product name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex justify-between gap-x-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Product name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem className="w-1/3">
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g. ₹200" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="description"
