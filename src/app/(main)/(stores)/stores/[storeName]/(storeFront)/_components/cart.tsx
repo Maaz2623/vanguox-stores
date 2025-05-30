@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
@@ -19,6 +20,8 @@ import {
 import { MinusIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface CartProps {
   open: boolean;
@@ -28,6 +31,8 @@ interface CartProps {
 
 export const Cart = ({ open, setOpen, storeName }: CartProps) => {
   const trpc = useTRPC();
+
+  const isMobile = useIsMobile();
 
   const queryClient = useQueryClient();
 
@@ -78,23 +83,31 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="px-3">
-        <SheetHeader>
-          <SheetTitle className="text-2xl font-semibold">Your Cart</SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
+    <Drawer
+      open={open}
+      onOpenChange={setOpen}
+      direction={isMobile ? "bottom" : "right"}
+    >
+      <DrawerContent className="px-3 h-[800px]">
+        <DrawerHeader>
+          <DrawerTitle className="text-2xl font-semibold">
+            Your Cart
+          </DrawerTitle>
+          <DrawerDescription className="text-sm text-muted-foreground">
             Review your selected items before checking out.
-          </SheetDescription>
-        </SheetHeader>
+          </DrawerDescription>
+        </DrawerHeader>
         <Separator />
-        <div className="mt-6 flex flex-col gap-4 h-[70vh]">
+        <div className="mt-6 flex flex-col gap-4 h-[50%]">
           {cartItems.length === 0 ? (
             <div className="text-center text-muted-foreground mt-10">
               Your cart is empty.
             </div>
           ) : (
             <>
-              <ScrollArea className="flex-1 pr-2 h-[200px]">
+              <ScrollArea
+                className={cn("flex-1 pr-2 h-[200px]", isMobile && "h-[150px]")}
+              >
                 <div className="flex flex-col gap-y-4">
                   {cartItems.map((item) => (
                     <CartProductCard
@@ -109,24 +122,27 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
               <Separator />
             </>
           )}
-
-          {cartItems.length > 0 && (
-            <>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-semibold">₹{subtotal}</span>
-              </div>
-
-              <div className="flex gap-2">
-                <Button className="flex-1" onClick={handleCreateOrder}>
-                  Checkout
-                </Button>
-              </div>
-            </>
-          )}
         </div>
-      </SheetContent>
-    </Sheet>
+        <div>
+          <DrawerFooter>
+            {cartItems.length > 0 && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-semibold">₹{subtotal}</span>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={handleCreateOrder}>
+                    Checkout
+                  </Button>
+                </div>
+              </>
+            )}
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
