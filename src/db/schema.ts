@@ -6,6 +6,8 @@ import {
   uuid,
   integer,
   decimal,
+  pgEnum,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -110,15 +112,66 @@ export const productImages = pgTable("product_images", {
     .notNull(),
 });
 
+export const deliveryStatusEnum = pgEnum("delivery_status", [
+  "pending",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "failed",
+]);
+
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+
+    storeId: uuid("store_id")
+      .references(() => stores.id, { onDelete: "cascade" })
+      .notNull(),
+
+    userId: text("user_id").default("maaz").notNull(), // assuming you have a user table
+
+    cartId: uuid("cart_id")
+      .references(() => carts.id, { onDelete: "cascade" })
+      .notNull(),
+
+    paid: boolean("paid").default(false).notNull(),
+
+    paymentIntentId: text("payment_intent_id"), // for Stripe/Razorpay etc.
+
+    deliveryStatus: deliveryStatusEnum("delivery_status")
+      .default("pending")
+      .notNull(),
+
+    address: text("address").notNull(), // shipping address
+
+    notes: text("notes"), // any extra instructions
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    storeIndex: index("orders_store_idx").on(table.storeId),
+    userIndex: index("orders_user_idx").on(table.userId),
+    cartIndex: index("orders_cart_idx").on(table.cartId),
+    deliveryStatusIndex: index("orders_delivery_status_idx").on(
+      table.deliveryStatus
+    ),
+  })
+);
+
 export const carts = pgTable("carts", {
   id: uuid("id").notNull().defaultRandom().primaryKey(),
   storeId: uuid("store_id")
     .references(() => stores.id, { onDelete: "cascade" })
     .notNull(),
   userId: text("user").default("maaz").notNull(),
-  paid: boolean("paid").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  delivered: boolean("delivered").default(false).notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

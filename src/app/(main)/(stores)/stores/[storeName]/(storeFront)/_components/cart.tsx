@@ -29,6 +29,8 @@ interface CartProps {
 export const Cart = ({ open, setOpen, storeName }: CartProps) => {
   const trpc = useTRPC();
 
+  const queryClient = useQueryClient();
+
   const { data: cart } = useSuspenseQuery(
     trpc.carts.getCartByStoreName.queryOptions({
       storeName,
@@ -41,7 +43,39 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
     })
   );
 
+  const mutation = useMutation(trpc.orders.createOrder.mutationOptions());
+
   if (isLoading || !cartItems) return <div>loading...</div>;
+
+  const subtotal = cartItems.reduce((total, item) => {
+    return total + Number(item.product.price) * item.quantity;
+  }, 0);
+
+  const handleCreateOrder = () => {
+    const createOrder = mutation.mutateAsync(
+      {
+        storeName: storeName,
+        cartId: cart.id,
+      },
+      {
+        onSuccess: (data) => {
+          console.log(data);
+          setOpen(false);
+          queryClient.invalidateQueries(
+            trpc.carts.getCartByStoreName.queryOptions({
+              storeName,
+            })
+          );
+        },
+      }
+    );
+
+    toast.promise(createOrder, {
+      loading: "Creating order.",
+      success: "Order has been created.",
+      error: "Something went wrong",
+    });
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -80,14 +114,11 @@ export const Cart = ({ open, setOpen, storeName }: CartProps) => {
             <>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-semibold">₹{2000}</span>
+                <span className="font-semibold">₹{subtotal}</span>
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  className="flex-1"
-                  onClick={() => console.log("checkout")}
-                >
+                <Button className="flex-1" onClick={handleCreateOrder}>
                   Checkout
                 </Button>
               </div>
