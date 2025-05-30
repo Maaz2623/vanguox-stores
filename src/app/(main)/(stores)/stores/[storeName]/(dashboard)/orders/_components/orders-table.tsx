@@ -72,6 +72,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
@@ -93,11 +96,42 @@ import {
 } from "@/components/ui/table";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import {
+  Clock,
+  Truck,
+  PackageCheck,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 
 export const orderRowSchema = z.object({
   id: z.string().uuid(),
   address: z.string(),
+  deliveryStatus: z.enum([
+    "pending",
+    "shipped",
+    "delivered",
+    "cancelled",
+    "failed",
+  ]),
 });
+
+const statusIcons = {
+  pending: Clock,
+  shipped: Truck,
+  delivered: PackageCheck,
+  cancelled: XCircle,
+  failed: AlertTriangle,
+};
+
+const statusColors = {
+  pending: "text-yellow-500 dark:text-yellow-400",
+  shipped: "text-blue-500 dark:text-blue-400",
+  delivered: "text-green-500 dark:text-green-400",
+  cancelled: "text-red-500 dark:text-red-400",
+  failed: "text-orange-500 dark:text-orange-400",
+};
 
 const columns: ColumnDef<z.infer<typeof orderRowSchema>>[] = [
   {
@@ -135,33 +169,33 @@ const columns: ColumnDef<z.infer<typeof orderRowSchema>>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "deliveryStatus",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.deliveryStatus;
+      const Icon = statusIcons[status];
+      const color = statusColors[status];
+
+      return (
+        <Badge variant="outline" className="flex items-center gap-1 px-2">
+          <Icon className={`w-4 h-4 ${color}`} />
+          <span className="capitalize">{status}</span>
+        </Badge>
+      );
+    },
+  },
+  {
     accessorKey: "address",
     header: "Address",
     cell: ({ row }) => {
       return (
         <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-            Reviewer
-          </Label>
-          <Select>
-            <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-              size="sm"
-              id={`${row.original.id}-reviewer`}
-            >
-              <SelectValue placeholder="Assign reviewer" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-              <SelectItem value="Jamik Tashpulatov">
-                Jamik Tashpulatov
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <div>{row.original.address}</div>
         </>
       );
     },
   },
+
   {
     id: "actions",
     header: "Actions",
@@ -178,10 +212,33 @@ const columns: ColumnDef<z.infer<typeof orderRowSchema>>[] = [
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem>
+                  <Clock className="mr-2 h-4 w-4 text-yellow-500" />
+                  Pending
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Truck className="mr-2 h-4 w-4 text-blue-500" />
+                  Shipped
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <PackageCheck className="mr-2 h-4 w-4 text-green-500" />
+                  Delivered
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                  Cancelled
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <AlertTriangle className="mr-2 h-4 w-4 text-orange-500" />
+                  Failed
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
             <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>
