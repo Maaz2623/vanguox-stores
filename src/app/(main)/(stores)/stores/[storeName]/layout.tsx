@@ -31,7 +31,7 @@ export default async function StoreNameLayout({
       <AppSidebar variant="inset" />
       <SidebarInset>
         <HydrationBoundary state={dehydrate(queryClient)}>
-          <Suspense fallback={<div>loading...</div>}>
+          <Suspense>
             <SiteHeader storeName={storeName} />
           </Suspense>
         </HydrationBoundary>

@@ -28,8 +28,6 @@ export function SiteHeader({ storeName }: { storeName: string }) {
     })
   );
 
-  if (!cart || !cartItems) return <div>loading...</div>;
-
   const isActive = pathname.includes("/shop");
 
   return (
@@ -42,7 +40,7 @@ export function SiteHeader({ storeName }: { storeName: string }) {
         />
         <h1 className="text-base font-medium">Documents</h1>
       </div>
-      {isActive && (
+      {isActive && cart && cartItems && (
         <>
           <Cart open={cartOpen} setOpen={setCartOpen} storeName={storeName} />
           <Button
