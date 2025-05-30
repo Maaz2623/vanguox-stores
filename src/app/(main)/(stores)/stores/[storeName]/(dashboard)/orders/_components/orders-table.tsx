@@ -1,14 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 import {
   DndContext,
@@ -82,7 +74,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -101,28 +92,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTRPC } from "@/trpc/client";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { toast } from "sonner";
-import { ImagesIcon, TrashIcon } from "lucide-react";
-import Image from "next/image";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
-export const schema = z.object({
+export const orderRowSchema = z.object({
   id: z.string().uuid(),
-  title: z.string(),
-  description: z.string(),
-  storeId: z.string().uuid(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  address: z.string(),
 });
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const columns: ColumnDef<z.infer<typeof orderRowSchema>>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -150,23 +127,17 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "title",
-    header: "Title",
+    accessorKey: "id",
+    header: "Order ID",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />;
     },
     enableHiding: false,
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    accessorKey: "address",
+    header: "Address",
     cell: ({ row }) => {
-      const isAssigned = row.original.description !== "Assign reviewer";
-
-      if (isAssigned) {
-        return row.original.description;
-      }
-
       return (
         <>
           <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
@@ -192,16 +163,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
   },
   {
-    id: "images",
-    header: "Images",
-    cell: ({ row }) => {
-      return <ImagesViewer productId={row.original.id} />;
-    },
-  },
-  {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
+    cell: ({}) => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -219,7 +183,6 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             <DropdownMenuItem>Make a copy</DropdownMenuItem>
             <DropdownMenuItem>Favorite</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DeleteButton name={row.original.title} id={row.original.id} />
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -227,21 +190,23 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ];
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+function DraggableRow({ row }: { row: Row<z.infer<typeof orderRowSchema>> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   });
 
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: "grab",
+  };
+
   return (
     <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
       ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition: transition,
-      }}
+      style={style}
+      data-state={row.getIsSelected() && "selected"}
     >
       {row.getVisibleCells().map((cell) => (
         <TableCell key={cell.id}>
@@ -256,7 +221,7 @@ export function OrdersTable({ storeName }: { storeName: string }) {
   const trpc = useTRPC();
 
   const { data } = useSuspenseQuery(
-    trpc.products.getProductsByStoreName.queryOptions({
+    trpc.orders.getOrdersByStoreName.queryOptions({
       storeName,
     })
   );
@@ -503,19 +468,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+function TableCellViewer({ item }: { item: z.infer<typeof orderRowSchema> }) {
   const isMobile = useIsMobile();
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className="text-foreground w-fit px-0 text-left">
-          {item.title}
+          {item.id}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.title}</DrawerTitle>
+          <DrawerTitle>{item.id}</DrawerTitle>
           <DrawerDescription>
             Showing total visitors for the last 6 months
           </DrawerDescription>
@@ -578,28 +543,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Separator />
             </>
           )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.title} />
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.description}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
-                    Jamik Tashpulatov
-                  </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </form>
         </div>
         <DrawerFooter>
           <Button>Submit</Button>
@@ -609,91 +552,5 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-function DeleteButton({ id, name }: { id: string; name: string }) {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation(
-    trpc.products.deleteById.mutationOptions({
-      onSuccess: (data) => {
-        queryClient.invalidateQueries(
-          trpc.products.getProductsByStoreName.queryOptions({
-            storeName: data.storeName,
-          })
-        );
-      },
-    })
-  );
-
-  const handleDelete = async () => {
-    toast.promise(mutation.mutateAsync({ productId: id }), {
-      loading: `Deleting product: ${name}`,
-      success: `Deleted product: ${name}`,
-      error: `Error deleting ${name}`,
-    });
-  };
-
-  return (
-    <ConfirmationDialog
-      title="Delete Store"
-      description="This action cannot be undone. It will permanently delete your store."
-      onConfirm={handleDelete}
-    >
-      <DropdownMenuItem
-        className="text-rose-500 hover:text-rose-500"
-        onSelect={(e) => e.preventDefault()}
-      >
-        <TrashIcon className="text-rose-500 mr-2 h-4 w-4" />
-        Delete
-      </DropdownMenuItem>
-    </ConfirmationDialog>
-  );
-}
-
-function ImagesViewer({ productId }: { productId: string }) {
-  const trpc = useTRPC();
-
-  const { data } = useQuery(
-    trpc.productImages.getImagesByProductId.queryOptions({
-      productId,
-    })
-  );
-
-  if (!data) return <div>loading...</div>;
-
-  console.log(data);
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={`outline`} size={`icon`}>
-          <ImagesIcon />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Produc Images</DialogTitle>
-          <DialogDescription>These are your product images</DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="h-full w-full border shadow-inner rounded-lg">
-          <div className="flex flex-wrap gap-3 p-2">
-            {data.map((src, i) => (
-              <div key={i} className="relative w-fit">
-                <Image
-                  src={src.url}
-                  alt={`Preview ${i + 1}`}
-                  width={120}
-                  height={120}
-                  className="rounded-md border object-cover aspect-square"
-                />
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
   );
 }

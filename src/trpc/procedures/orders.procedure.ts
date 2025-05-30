@@ -5,6 +5,25 @@ import { carts, orders, stores } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const ordersRouter = createTRPCRouter({
+  getOrdersByStoreName: baseProcedure
+    .input(
+      z.object({
+        storeName: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(eq(stores.name, input.storeName));
+
+      const ordersArray = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.storeId, store.id));
+
+      return ordersArray;
+    }),
   createOrder: baseProcedure
     .input(
       z.object({
