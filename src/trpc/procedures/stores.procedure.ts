@@ -5,6 +5,26 @@ import z from "zod";
 import { eq } from "drizzle-orm";
 
 export const storesRouter = createTRPCRouter({
+  checkIsAdmin: protectedProcedure
+    .input(
+      z.object({
+        storeName: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { auth } = ctx;
+
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(eq(stores.name, input.storeName));
+
+      if (auth.user.id !== store.ownerId) {
+        return false;
+      }
+
+      return true;
+    }),
   deleteByStoreName: baseProcedure
     .input(
       z.object({
