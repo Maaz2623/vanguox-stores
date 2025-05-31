@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import { stores } from "@/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
@@ -19,22 +19,30 @@ export const storesRouter = createTRPCRouter({
 
       return deletedStore.name;
     }),
-  getStoresByUser: baseProcedure.query(async () => {
-    const data = await db.select().from(stores);
+  getStoresByUser: protectedProcedure.query(async ({ ctx }) => {
+    const { auth } = ctx;
+
+    const data = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.ownerId, auth.user.id));
 
     return data;
   }),
-  createStore: baseProcedure
+  createStore: protectedProcedure
     .input(
       z.object({
         name: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const { auth } = ctx;
+
       const [newStore] = await db
         .insert(stores)
         .values({
           name: input.name,
+          ownerId: auth.user.id,
         })
         .returning();
 

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import z from "zod";
 import { productImages, products, stores } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -122,18 +122,27 @@ export const productsRouter = createTRPCRouter({
         productTitle: deletedProduct.title,
       };
     }),
-  getProductsByStoreName: baseProcedure
+  getProductsByStoreName: protectedProcedure
     .input(
       z.object({
         storeName: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      const { auth } = ctx;
+
       const [store] = await db
         .select()
         .from(stores)
         .where(eq(stores.name, input.storeName));
 
+      if (store.ownerId !== auth.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      
       const storeProducts = await db
         .select()
         .from(products)
@@ -142,7 +151,7 @@ export const productsRouter = createTRPCRouter({
 
       return storeProducts;
     }),
-  createProduct: baseProcedure
+  createProduct: protectedProcedure
     .input(
       z.object({
         images: z.array(z.string()),
@@ -152,7 +161,9 @@ export const productsRouter = createTRPCRouter({
         storeName: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const { auth } = ctx;
+
       const [store] = await db
         .select()
         .from(stores)
@@ -161,6 +172,12 @@ export const productsRouter = createTRPCRouter({
       if (!store) {
         throw new TRPCError({
           code: "NOT_FOUND",
+        });
+      }
+
+      if (store.ownerId !== auth.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
         });
       }
 

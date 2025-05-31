@@ -73,9 +73,11 @@ export const verification = pgTable("verification", {
 export const stores = pgTable("stores", {
   id: uuid("id").notNull().defaultRandom().primaryKey(),
   name: text("name").notNull(),
-  ownerId: text("owner_id").references(() => user.id, {
-    onDelete: "cascade",
-  }),
+  ownerId: text("owner_id")
+    .references(() => user.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
